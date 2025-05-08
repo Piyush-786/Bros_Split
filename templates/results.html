@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bros Split - Results</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-4">
+    <h2 class="text-success">Final Balances</h2>
+    <ul class="list-group">
+        {% for name, amt in balances.items() %}
+            <li class="list-group-item d-flex justify-content-between">
+                {{ name }}
+                {% if amt > 0 %}
+                    <span class="text-success">Gets ₹{{ '%.2f' % amt }}</span>
+                {% elif amt < 0 %}
+                    <span class="text-danger">Owes ₹{{ '%.2f' % -amt }}</span>
+                {% else %}
+                    <span>Settled up</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h3 class="mt-4">Settlement Suggestions</h3>
+    <ul class="list-group">
+        {% for s in settlements %}
+            <li class="list-group-item">{{ s }}</li>
+        {% endfor %}
+    </ul>
+    <footer class="text-center mt-5 text-muted">
+        <hr>
+        <p>Designed by <strong>Piyush</strong><br>Made in India</p>
+    </footer>
+</body>
+</html>

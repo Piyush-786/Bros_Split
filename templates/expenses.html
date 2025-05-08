@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bros Split - Add Expense</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-4">
+    <h2 class="text-primary">Add an Expense</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label>Description:</label>
+            <input type="text" name="desc" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Amount:</label>
+            <input type="number" name="amount" step="0.01" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Paid By:</label>
+            <select name="payer" class="form-select">
+                {% for m in members %}
+                    <option value="{{ m }}">{{ m }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label>Shared By:</label><br>
+            {% for m in members %}
+                <div class="form-check form-check-inline">
+                    <input type="checkbox" name="shared_by" value="{{ m }}" class="form-check-input">
+                    <label class="form-check-label">{{ m }}</label>
+                </div>
+            {% endfor %}
+        </div>
+        <button class="btn btn-primary">Add Expense</button>
+        <button class="btn btn-warning" name="done">Finish & Show Results</button>
+    </form>
+    <footer class="text-center mt-5 text-muted">
+        <hr>
+        <p>Designed by <strong>Piyush</strong><br>Made in India</p>
+    </footer>
+</body>
+</html>
