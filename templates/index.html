@@ -1,21 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Bros Split</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <title>Welcome to Bros Split</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 1em;
+        }
+        .footer {
+            margin-top: 40px;
+            font-weight: bold;
+        }
+        .footer span {
+            display: block;
+        }
+    </style>
 </head>
-<body class="container mt-5">
-    <h2 class="mb-4 text-primary">Welcome to Bros Split</h2>
-    <form method="POST">
-        <div class="mb-3">
-            <label for="members" class="form-label">Enter names (comma-separated):</label>
-            <input type="text" name="members" class="form-control" placeholder="e.g. Alice, Bob, Charlie" required>
-        </div>
-        <button class="btn btn-success">Continue</button>
+<body>
+    <h1>Welcome to Bros Split</h1>
+    <form action="/add_names" method="POST">
+        <input type="text" name="bill_name" placeholder="Enter Bill Name" required><br>
+        <input type="text" name="new_name" placeholder="Enter a Bro's Name">
+        <button type="submit" name="action" value="add">Add Bro</button><br>
+        {% if names %}
+            <h3>Added Bros:</h3>
+            <ul>
+                {% for name in names %}
+                    <li>{{ name }} <a href="/delete_name/{{ name }}">❌</a></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <button type="submit" name="action" value="continue">Continue</button>
     </form>
-    <footer class="text-center mt-5 text-muted">
-        <hr>
-        <p>Designed by <strong>Piyush</strong><br>Made in India</p>
-    </footer>
+    <div class="footer">
+        <span><strong>Designed by Piyush</strong></span>
+        <span><strong>Made in India</strong> 🇮🇳</span>
+    </div>
 </body>
 </html>

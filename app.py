@@ -1,56 +1,86 @@
-from flask import Flask, render_template, request, redirect, url_for, session
-from collections import defaultdict
-
+from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
-app.secret_key = 'bros_split_secret_key'
 
-@app.route('/', methods=['GET', 'POST'])
+# In-memory storage
+people = []
+expenses = []
+bill_name = ""
+
+@app.route("/", methods=["GET"])
 def index():
-    if request.method == 'POST':
-        members = request.form['members'].split(',')
-        session['members'] = [m.strip() for m in members]
-        session['expenses'] = []
-        return redirect(url_for('expenses'))
-    return render_template('index.html')
+    return render_template("index.html", names=people)
 
-@app.route('/expenses', methods=['GET', 'POST'])
-def expenses():
-    if request.method == 'POST':
-        desc = request.form['desc']
-        amount = float(request.form['amount'])
-        payer = request.form['payer']
-        shared_by = request.form.getlist('shared_by')
+@app.route("/add_names", methods=["POST"])
+def add_names():
+    global bill_name
+    action = request.form["action"]
+    if "new_name" in request.form and request.form["new_name"]:
+        people.append(request.form["new_name"])
+    if "bill_name" in request.form:
+        bill_name = request.form["bill_name"]
+    if action == "continue":
+        return redirect("/add_expense")
+    return render_template("index.html", names=people)
 
-        expense = {'desc': desc, 'amount': amount, 'payer': payer, 'shared_by': shared_by}
-        session['expenses'].append(expense)
-        session.modified = True
+@app.route("/delete_name/<name>")
+def delete_name(name):
+    if name in people:
+        people.remove(name)
+    return redirect("/")
 
-        if 'done' in request.form:
-            return redirect(url_for('results'))
-    return render_template('expenses.html', members=session['members'])
+@app.route("/add_expense", methods=["GET", "POST"])
+def add_expense():
+    if request.method == "POST":
+        payer = request.form["paid_by"]
+        amount = float(request.form["amount"])
+        shared_by = request.form.getlist("shared_by")
+        if not payer or not amount or not shared_by:
+            return "<script>alert('Please fill all fields.'); window.history.back();</script>"
+        expenses.append({"paid_by": payer, "amount": amount, "shared_by": shared_by})
+        if "finish" in request.form:
+            return redirect("/summary")
+    return render_template("add_expense.html", people=people, expenses=expenses)
 
-@app.route('/results')
-def results():
-    balances = defaultdict(float)
-    for exp in session['expenses']:
-        share = exp['amount'] / len(exp['shared_by'])
-        for member in exp['shared_by']:
-            balances[member] -= share
-        balances[exp['payer']] += exp['amount']
+@app.route("/edit_expenses", methods=["GET", "POST"])
+def edit_expenses():
+    if request.method == "POST":
+        for i, exp in enumerate(expenses):
+            exp["paid_by"] = request.form.get(f"paid_by_{i}")
+            exp["amount"] = float(request.form.get(f"amount_{i}"))
+            exp["shared_by"] = request.form.getlist(f"shared_by_{i}")
+        return redirect("/summary")
+    return render_template("edit_expenses.html", people=people, expenses=expenses)
 
-    settlements = []
-    owed = sorted([(k, v) for k, v in balances.items() if v < 0], key=lambda x: x[1])
-    owing = sorted([(k, v) for k, v in balances.items() if v > 0], key=lambda x: x[1], reverse=True)
+@app.route("/summary")
+def summary():
+    balances = {p: 0 for p in people}
+    total = 0
+    for exp in expenses:
+        payer = exp["paid_by"]
+        amt = exp["amount"]
+        shared = exp["shared_by"]
+        share = amt / len(shared)
+        total += amt
+        for person in shared:
+            balances[person] -= share
+        balances[payer] += amt
+    report = []
+    for person, balance in balances.items():
+        if balance < 0:
+            report.append(f"{person} owes ₹{abs(balance):.2f}")
+        elif balance > 0:
+            report.append(f"{person} gets back ₹{balance:.2f}")
+        else:
+            report.append(f"{person} is settled up.")
+    return render_template("summary.html", report=report, bill_name=bill_name, total=total)
 
-    i, j = 0, 0
-    while i < len(owed) and j < len(owing):
-        ower, owe_amt = owed[i]
-        owner, own_amt = owing[j]
-        settle_amt = min(-owe_amt, own_amt)
-        settlements.append(f"{ower} owes {owner} ₹{settle_amt:.2f}")
-        owed[i] = (ower, owe_amt + settle_amt)
-        owing[j] = (owner, own_amt - settle_amt)
-        if owed[i][1] == 0: i += 1
-        if owing[j][1] == 0: j += 1
+@app.route("/new_split")
+def new_split():
+    global people, expenses, bill_name
+    people = []
+    expenses = []
+    bill_name = ""
+    return redirect("/")
 
-    return render_template('results.html', balances=balances, settlements=settlements)
+if __name__ == "__main__":
+    app.run(debug=True)

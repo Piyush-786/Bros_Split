@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head><title>Edit Expenses</title></head>
+<body>
+<h2>Edit Expenses</h2>
+<form method="post">
+    {% for i, exp in enumerate(expenses) %}
+        <div>
+            <h4>Expense {{ i+1 }}</h4>
+            <label>Paid by:</label>
+            <select name="paid_by_{{ i }}">
+                {% for name in people %}
+                <option value="{{ name }}" {% if name == exp.paid_by %}selected{% endif %}>{{ name }}</option>
+                {% endfor %}
+            </select><br>
+            <label>Amount:</label>
+            <input type="number" name="amount_{{ i }}" value="{{ exp.amount }}"><br>
+            <label>Shared by:</label><br>
+            {% for name in people %}
+                <input type="checkbox" name="shared_by_{{ i }}" value="{{ name }}" {% if name in exp.shared_by %}checked{% endif %}> {{ name }}<br>
+            {% endfor %}
+        </div><hr>
+    {% endfor %}
+    <button type="submit">Save Changes</button>
+</form>
+</body>
+</html>

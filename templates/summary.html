@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head><title>Summary</title></head>
+<body>
+    <h2>{{ bill_name }}</h2>
+    <h3>Total Expense: ₹{{ total }}</h3>
+    <ul>
+    {% for r in report %}
+        <li>{{ r }}</li>
+    {% endfor %}
+    </ul>
+    <a href="/edit_expenses"><button>Edit Split</button></a>
+    <a href="/new_split"><button>New Split</button></a>
+</body>
+</html>

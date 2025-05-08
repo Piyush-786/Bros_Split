@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head><title>Add Expense</title></head>
+<body>
+<h2>Add Expense</h2>
+<form method="post">
+    <label>Paid by:</label>
+    <select name="paid_by" required>
+        <option value="">--Select--</option>
+        {% for name in people %}
+        <option value="{{ name }}">{{ name }}</option>
+        {% endfor %}
+    </select><br>
+    <label>Amount:</label>
+    <input type="number" name="amount" step="0.01" required><br>
+    <label>Shared by:</label><br>
+    {% for name in people %}
+        <input type="checkbox" name="shared_by" value="{{ name }}"> {{ name }}<br>
+    {% endfor %}
+    <button type="submit">Add Expense</button>
+    <button type="submit" name="finish">Finish</button>
+</form>
+</body>
+</html>
